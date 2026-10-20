@@ -9,6 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
+
+# Yarn 4
+.yarn/*
+!.yarn/releases
+.pnp.*
 dist-ssr
 *.local
 
