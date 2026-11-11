@@ -363,6 +363,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gsap@npm:^3.15.1":
+  version: 3.15.1
+  resolution: "gsap@npm:3.15.1"
+  checksum: 10c0/5e35682cc9d18af83b457b657c3c1aa1b9b49b187560059e187d079752a7f07c661150e3aa95eeefe0be279a71a60359d015698aba3db5d554049d3769975197
+  languageName: node
+  linkType: hard
+
 "has-flag@npm:^4.0.0":
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
@@ -603,6 +610,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "portfolio-v2@workspace:."
   dependencies:
+    gsap: "npm:^3.15.1"
     sass-embedded: "npm:^1.108.2"
     typescript: "npm:~6.0.3"
     vite: "npm:^8.3.4"

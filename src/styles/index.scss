@@ -1,8 +1,10 @@
+@use "./reset";
 @use "./fonts";
 @use "./custom-properties";
 @use "./typography";
 @use "./utilities";
 @use "./sections/intro";
+@use "./sections/work";
 
 :root {
   font-size: 18px;

@@ -1,0 +1,44 @@
+@use "../mixins" as *;
+
+.work {
+  @include fluid("margin-bottom", 238px, 415px);
+}
+
+.work__title {
+  @include fluid("margin-bottom", 141px, 255px);
+}
+
+.work__list {
+  @include fluid("gap", 100px, 160px);
+
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.work-item__video-wrapper {
+  --scale: 0;
+
+  @include fluid("--width", 350px, 600px);
+  @include fluid("--height", 350px, 400px);
+}
+
+.work-item__video-wrapper {
+  position: relative;
+  width: calc(var(--width) * var(--scale));
+  height: calc(var(--height) * var(--scale));
+  margin: 12px auto;
+}
+
+.work-item__video {
+  --scale: 0;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: calc(var(--width) * var(--scale));
+  height: calc(var(--height) * var(--scale));
+  object-fit: cover;
+  background-color: rgba(255, 0, 0, 0.434);
+}

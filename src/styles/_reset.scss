@@ -1,0 +1,20 @@
+/* Width and height include padding and border. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Spacing comes only from your own rules. */
+* {
+  margin: 0;
+}
+
+/* No baseline gap under images and no overflow. */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+}

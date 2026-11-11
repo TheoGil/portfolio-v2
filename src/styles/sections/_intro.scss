@@ -1,7 +1,9 @@
 @use "../mixins" as *;
 
 .intro {
-  text-align: center;
+  @include fluid("margin-bottom", 221px, 469px);
+
+  margin-top: 283px;
 }
 
 .intro__title {
@@ -14,9 +16,11 @@
 
 .intro__portrait {
   @include fluid("width", 259px, 456px);
+  @include fluid("margin-bottom", 60px, 78px);
 
   display: grid;
   place-items: center;
+  margin-top: 200px;
   height: auto;
   aspect-ratio: 1;
   background-image: url("../../assets/images/protrait-frame.svg");
