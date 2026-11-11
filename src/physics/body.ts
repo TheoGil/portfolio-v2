@@ -96,6 +96,19 @@ export const SOFT_DEFAULTS: Record<"pressure" | "shape", SoftTuning> = {
   },
 };
 
+/**
+ * 2D affine transform, same layout as DOMMatrix and canvas `transform(a, b, c, d, e, f)`:
+ * (x, y) -> (a * x + c * y + e, b * x + d * y + f).
+ */
+export interface Transform {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+}
+
 const TAU = Math.PI * 2;
 /** Max pre-stretch of pressure body edges, relative to their length. */
 const MAX_PRESTRETCH = 0.6;
@@ -520,6 +533,93 @@ export class Body {
       }
     }
     return best;
+  }
+
+  /**
+   * Transform from the rest shape (`lx/ly` space: relative to the centroid, at
+   * angle 0) to the rendered points (`rx/ry`), to attach drawings to a body.
+   * It is the best fit of the rest shape onto the points, so it follows soft
+   * bodies too, and is interpolated like them.
+   *
+   * @param deformation 0: position and rotation only. 1: also follows the
+   *   squash and stretch of the body (best affine fit). In between: blend.
+   */
+  getTransform(deformation = 0, out: Transform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) {
+    const { rx, ry, lx, ly } = this;
+    const n = this.pointCount;
+    let lmx = 0;
+    let lmy = 0;
+    let qmx = 0;
+    let qmy = 0;
+    for (let i = 0; i < n; i++) {
+      lmx += lx[i];
+      lmy += ly[i];
+      qmx += rx[i];
+      qmy += ry[i];
+    }
+    lmx /= n;
+    lmy /= n;
+    qmx /= n;
+    qmy /= n;
+
+    // Covariances: P = Σ q lᵀ (points against rest), S = Σ l lᵀ (rest)
+    let pxx = 0;
+    let pxy = 0;
+    let pyx = 0;
+    let pyy = 0;
+    let sxx = 0;
+    let sxy = 0;
+    let syy = 0;
+    for (let i = 0; i < n; i++) {
+      const lX = lx[i] - lmx;
+      const lY = ly[i] - lmy;
+      const qX = rx[i] - qmx;
+      const qY = ry[i] - qmy;
+      pxx += qX * lX;
+      pxy += qX * lY;
+      pyx += qY * lX;
+      pyy += qY * lY;
+      sxx += lX * lX;
+      sxy += lX * lY;
+      syy += lY * lY;
+    }
+
+    // Rotation: 2D Procrustes, as in shape matching
+    const dot = pxx + pyy;
+    const cross = pyx - pxy;
+    const len = Math.sqrt(dot * dot + cross * cross);
+    const cos = len > 0 ? dot / len : 1;
+    const sin = len > 0 ? cross / len : 0;
+    let a = cos;
+    let b = sin;
+    let c = -sin;
+    let d = cos;
+
+    // Affine fit: A = P S⁻¹. Skipped if degenerate or flipped.
+    const det = sxx * syy - sxy * sxy;
+    if (deformation !== 0 && det > 1e-9) {
+      const ia = syy / det;
+      const ib = -sxy / det;
+      const id = sxx / det;
+      const fa = pxx * ia + pxy * ib;
+      const fc = pxx * ib + pxy * id;
+      const fb = pyx * ia + pyy * ib;
+      const fd = pyx * ib + pyy * id;
+      if (fa * fd - fb * fc > 0) {
+        a += (fa - a) * deformation;
+        b += (fb - b) * deformation;
+        c += (fc - c) * deformation;
+        d += (fd - d) * deformation;
+      }
+    }
+
+    out.a = a;
+    out.b = b;
+    out.c = c;
+    out.d = d;
+    out.e = qmx - a * lmx - c * lmy;
+    out.f = qmy - b * lmx - d * lmy;
+    return out;
   }
 
   updateBounds() {

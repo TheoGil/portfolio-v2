@@ -42,7 +42,17 @@ for (let k = 0; k < body.loopStarts.length - 1; k++) {
 ctx.fill("evenodd");
 ```
 
-`body.x`, `body.y`, `body.angle` give the frame of any body (useful to draw sprites), including soft ones (best fit of the points).
+`body.x`, `body.y`, `body.angle` give the frame of any body, including soft ones (best fit of the points).
+
+To attach drawings to a body (faces, sprites, decals), use `body.getTransform(deformation)`. It maps the rest shape (origin at the centroid, unrotated) to the rendered points, is interpolated like them, and follows soft bodies. `deformation` blends from rotation only (0) to also following squash and stretch (1):
+
+```ts
+const t = body.getTransform(0.7);
+ctx.save();
+ctx.transform(t.a, t.b, t.c, t.d, t.e, t.f);
+drawFace(ctx, 0, -20); // in rest shape coordinates
+ctx.restore();
+```
 
 ## Bodies
 
@@ -78,7 +88,7 @@ Stiffness and damping values are normalized by point mass (they are acceleration
 
 ### Methods
 
-`setPosition`, `setAngle`, `setVelocity`, `setAngularVelocity`, `applyForce`, `applyTorque`, `applyImpulse`, `containsPoint`, `closestPoint`, `area`.
+`setPosition`, `setAngle`, `setVelocity`, `setAngularVelocity`, `applyForce`, `applyTorque`, `applyImpulse`, `containsPoint`, `closestPoint`, `getTransform`, `area`.
 
 ## Springs
 

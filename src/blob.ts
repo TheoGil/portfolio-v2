@@ -82,20 +82,27 @@ function populate() {
   world.add(platform, paddle);
 
   // Pressure blobs (gas)
-  world.add(
+  faces.clear();
+  const blobs = [
     Bodies.circle(col(0.05), height * 0.2, 70 * s, { kind: "pressure" }),
     Bodies.circle(col(0.2), height * 0.1, 45 * s, { kind: "pressure", pressure: 300 }),
     Bodies.circle(col(0.55), height * 0.15, 55 * s, { kind: "pressure", pressure: 1500 }),
-    Bodies.ring(col(0.9), height * 0.2, 60 * s, 38 * s, { kind: "pressure", label: "tire" }),
-  );
+  ];
+  world.add(...blobs);
+  addFace(blobs[0], 70 * s);
+  addFace(blobs[1], 45 * s);
+  addFace(blobs[2], 55 * s);
+  world.add(Bodies.ring(col(0.9), height * 0.2, 60 * s, 38 * s, { kind: "pressure", label: "tire" }));
 
   // Shape matching
+  const jelly = Bodies.fromVertices(col(0.8), height * 0.1, blobVertices(60 * s), { kind: "shape" });
   world.add(
     Bodies.star(col(0.35), height * 0.1, 5, 60 * s, 30 * s, { kind: "shape" }),
     Bodies.ring(col(0.45), height * 0.3, 55 * s, 28 * s, { kind: "shape", label: "O" }),
     Bodies.rectangle(col(0.65), height * 0.1, 140 * s, 60 * s, { kind: "shape" }),
-    Bodies.fromVertices(col(0.8), height * 0.1, blobVertices(60 * s), { kind: "shape" }),
+    jelly,
   );
+  addFace(jelly, 50 * s);
 
   // Rigid bodies
   world.add(
@@ -135,6 +142,25 @@ function spawn(x: number, y: number) {
           ? Bodies.ring(x, y, r * 1.2, r * 0.6, { kind: "shape" })
           : Bodies.rectangle(x, y, r * 1.6, r * 1.2, { angle: Math.random() * Math.PI });
   world.add(body);
+  if (pick === 0) addFace(body, r);
+}
+
+// -----------------------------------------------------------------------------
+// Faces: pure rendering, drawn in the rest frame of the body (see drawFace)
+// -----------------------------------------------------------------------------
+
+interface Face {
+  /** Radius of the body, faces are drawn relative to it. */
+  size: number;
+  /** Smoothed sideways speed in the body frame, -1..1: the face slides toward it. */
+  look: number;
+  blinkAt: number;
+}
+
+const faces = new Map<Body, Face>();
+
+function addFace(body: Body, size: number) {
+  faces.set(body, { size, look: 0, blinkAt: time + 1 + Math.random() * 4 });
 }
 
 // -----------------------------------------------------------------------------
@@ -245,6 +271,58 @@ function drawBody(body: Body) {
   ctx.stroke();
 }
 
+const faceTransform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+
+function drawFace(body: Body, face: Face, frameDelta: number) {
+  const r = face.size;
+
+  // The face slides toward the side the body is moving to
+  const sideSpeed = body.cos * body.velocityX + body.sin * body.velocityY;
+  const target = Math.max(-1, Math.min(1, sideSpeed / 300));
+  face.look += (target - face.look) * Math.min(1, frameDelta * 5);
+
+  if (time > face.blinkAt + 0.12) face.blinkAt = time + 2 + Math.random() * 4;
+  const open = time > face.blinkAt ? 0.15 : 1;
+
+  // From here, draw in the rest frame of the body: origin at its centroid, y
+  // down, unrotated. The transform follows rotation and part of the squash.
+  const t = body.getTransform(0.7, faceTransform);
+  ctx.save();
+  ctx.transform(t.a, t.b, t.c, t.d, t.e, t.f);
+  ctx.translate(face.look * r * 0.35, -r * 0.2);
+
+  const eyeX = r * 0.26;
+  const eyeW = r * 0.08;
+  const eyeH = r * 0.13 * open;
+  ctx.fillStyle = colors.rigid;
+  ctx.beginPath();
+  for (const side of [-1, 1]) {
+    ctx.moveTo(side * eyeX + eyeW, 0);
+    ctx.ellipse(side * eyeX, 0, eyeW, eyeH, 0, 0, Math.PI * 2);
+  }
+  ctx.fill();
+
+  if (open === 1) {
+    ctx.fillStyle = colors.bg;
+    ctx.beginPath();
+    for (const side of [-1, 1]) {
+      const x = side * eyeX + eyeW * 0.3;
+      const y = -eyeH * 0.4;
+      ctx.moveTo(x + r * 0.03, y);
+      ctx.arc(x, y, r * 0.03, 0, Math.PI * 2);
+    }
+    ctx.fill();
+  }
+
+  ctx.beginPath();
+  ctx.arc(0, r * 0.1, r * 0.14, Math.PI * 0.2, Math.PI * 0.8);
+  ctx.strokeStyle = colors.rigid;
+  ctx.lineWidth = r * 0.05;
+  ctx.lineCap = "round";
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawDebug(body: Body) {
   const { rx, ry } = body;
   const color = bodyColor(body);
@@ -349,6 +427,9 @@ function render(frameDelta: number) {
   ctx.clearRect(0, 0, width, height);
   for (const body of world.bodies) {
     if (body.label !== "wall") drawBody(body);
+  }
+  if (!debug) {
+    for (const [body, face] of faces) drawFace(body, face, frameDelta);
   }
   if (debug) {
     for (const body of world.bodies) {

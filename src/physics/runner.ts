@@ -60,8 +60,8 @@ export class Runner {
   /** Advances the simulation to `time` (ms). Called by the loop, usable manually. */
   tick(time: number) {
     if (this.lastTime < 0) this.lastTime = time;
-    // Clamp long pauses (hidden tab, breakpoint...)
-    const frameDelta = Math.min((time - this.lastTime) / 1000, 0.25);
+    // Clamp long pauses (hidden tab, breakpoint...) and time going backwards
+    const frameDelta = Math.max(0, Math.min((time - this.lastTime) / 1000, 0.25));
     this.lastTime = time;
 
     this.accumulator += frameDelta * this.timeScale;
