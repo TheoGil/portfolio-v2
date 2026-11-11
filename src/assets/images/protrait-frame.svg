@@ -1,0 +1,24 @@
+<svg
+  width="456"
+  height="456"
+  viewBox="0 0 456 456"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <circle r="76" fill="#FBD710" />
+  <circle cx="152" r="76" fill="#FBD710" />
+  <circle cx="304" r="76" fill="#FBD710" />
+  <circle cx="456" r="76" fill="#FBD710" />
+  <circle cy="456" r="76" fill="#FBD710" />
+  <circle cx="152" cy="456" r="76" fill="#FBD710" />
+  <circle cx="304" cy="456" r="76" fill="#FBD710" />
+  <circle cx="456" cy="456" r="76" fill="#FBD710" />
+  <circle cx="456" cy="-3.32207e-06" r="76" fill="#FBD710" />
+  <circle cx="456" cy="152" r="76" fill="#FBD710" />
+  <circle cx="456" cy="304" r="76" fill="#FBD710" />
+  <circle cx="456" cy="456" r="76" fill="#FBD710" />
+  <circle cx="-3.32207e-06" cy="-3.32207e-06" r="76" fill="#FBD710" />
+  <circle cx="-3.32207e-06" cy="152" r="76" fill="#FBD710" />
+  <circle cx="-3.32207e-06" cy="304" r="76" fill="#FBD710" />
+  <circle cx="-3.32207e-06" cy="456" r="76" fill="#FBD710" />
+</svg>

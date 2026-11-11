@@ -1,0 +1,37 @@
+@use "../mixins" as *;
+
+.intro {
+  text-align: center;
+}
+
+.intro__title {
+  @include fluid("gap", 100px, 153px);
+}
+
+.its-a-me {
+  @include fluid("font-size", 130px, 260px);
+}
+
+.intro__portrait {
+  @include fluid("width", 259px, 456px);
+
+  display: grid;
+  place-items: center;
+  height: auto;
+  aspect-ratio: 1;
+  background-image: url("../../assets/images/protrait-frame.svg");
+  background-size: 100%;
+
+  img {
+    @include fluid("width", 138px, 227px);
+
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: block;
+  }
+}
+
+.intro__description {
+  max-width: 878px;
+}

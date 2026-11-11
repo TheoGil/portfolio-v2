@@ -1,0 +1,41 @@
+@use "mixins" as *;
+
+.heading {
+  font-family: var(--ff-heading);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 1%;
+}
+
+// Work
+// Skills
+.h2 {
+  font-size: 240px;
+  text-transform: uppercase;
+}
+
+// Case studies
+.h2-small {
+  font-size: 112px;
+  text-transform: uppercase;
+}
+
+.p-lead {
+  @include fluid("font-size", 36px, 64px);
+}
+
+// hello, i’m
+// { creative developer }
+// Work titles
+// Case studies title
+// { 9 years experience }
+.h3 {
+  @include fluid("font-size", 32px, 56px);
+  text-transform: uppercase;
+}
+
+// Work subtitles
+.h4 {
+  font-size: 20px;
+  text-transform: uppercase;
+}

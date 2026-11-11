@@ -1,0 +1,22 @@
+@use "sass:math";
+
+// Fluid value for a single-value property, interpolated linearly from $min
+// (at viewport width $min-vw) to $max (at $max-vw), and clamped outside that range.
+// Usage: @include fluid("padding-left", 50px, 100px);
+@mixin fluid($property, $min, $max, $min-vw: 440px, $max-vw: 1200px) {
+  $unit: math.unit($min);
+
+  @if math.unit($max) != $unit or math.unit($min-vw) != $unit or math.unit($max-vw) != $unit {
+    @error "fluid(): all values must share the same unit, got #{$min}, #{$max}, #{$min-vw}, #{$max-vw}.";
+  }
+
+  // Line through ($min-vw, $min) and ($max-vw, $max): slope in vw, intercept in $unit
+  $slope: math.div($max - $min, $max-vw - $min-vw);
+  $intercept: $min - $slope * $min-vw;
+
+  & {
+    #{$property}: $min; // Fallback
+    // min/max so values that shrink as the viewport grows ($min > $max) clamp correctly
+    #{$property}: clamp(math.min($min, $max), $intercept + $slope * 100vw, math.max($min, $max));
+  }
+}
