@@ -10,7 +10,8 @@
 // Work
 // Skills
 .h2 {
-  font-size: 240px;
+  @include fluid("font-size", 120px, 240px);
+
   text-transform: uppercase;
 }
 
