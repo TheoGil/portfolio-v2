@@ -6,8 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-let mm = gsap.matchMedia();
-
 const WORKS = {
   items: [] as Element[],
   scrolltriggers: [] as ScrollTrigger[],
@@ -95,11 +93,4 @@ const WORKS = {
     this.hoverCallbacks = [];
   },
 };
-
-mm.add("(min-width: 1000px) and (hover: hover)", () => {
-  WORKS.enable();
-
-  return () => {
-    WORKS.disable();
-  };
-});
+WORKS.enable();
