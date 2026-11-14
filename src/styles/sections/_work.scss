@@ -11,12 +11,23 @@
 }
 
 .work__list {
-  // @include fluid("gap", 100px, 160px); // DESIGN
-  @include fluid("gap", 200px, 320px); // SCROLL FEELS BETTER
+  @include fluid("gap", 100px, 160px); // DESIGN
+
+  @media (min-width: 1000px) and (hover: hover) {
+    @include fluid("gap", 200px, 320px); // SCROLL FEELS BETTER
+  }
 
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+
+.work-item .h3,
+.work-item .h4 {
+  will-change: translate;
+}
+.work-item__video {
+  will-change: scale;
 }
 
 .work-item {
@@ -30,30 +41,32 @@
   // outline: 1px currentColor solid;
   gap: 12px;
 
-  .h3 {
-    position: relative;
-    z-index: 1;
-    translate: 0
-      calc(var(--height) / 2 * -1 * var(--scale) - 12px * var(--scale));
-  }
+  @media (min-width: 1000px) and (hover: hover) {
+    .h3 {
+      position: relative;
+      z-index: 1;
+      translate: 0
+        calc(var(--height) / 2 * -1 * var(--scale) - 12px * var(--scale));
+    }
 
-  .h4 {
-    position: relative;
-    translate: 0 calc(var(--height) / 2 * var(--scale) + 12px * var(--scale));
+    .h4 {
+      position: relative;
+      translate: 0 calc(var(--height) / 2 * var(--scale) + 12px * var(--scale));
+    }
   }
 }
 
 .work-item__video {
   width: var(--width);
   height: var(--height);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  scale: var(--scale);
-  // width: calc(var(--width) * var(--scale));
-  // height: calc(var(--height) * var(--scale));
-  object-fit: cover;
   margin: 12px auto;
-  scale: var(--scale);
+  object-fit: cover;
+
+  @media (min-width: 1000px) and (hover: hover) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    scale: var(--scale);
+  }
 }

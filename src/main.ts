@@ -6,9 +6,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+let mm = gsap.matchMedia();
+
 const WORKS = {
   items: [] as Element[],
   scrolltriggers: [] as ScrollTrigger[],
+  hoverCallbacks: [] as (() => void)[],
   activeItemIndex: null as null | number,
   animateItemIn(i: number) {
     const el = this.items[i];
@@ -41,8 +44,8 @@ const WORKS = {
 
     this.activeItemIndex = i;
   },
-  init() {
-    this.items.push(...document.querySelectorAll(".work-item"));
+  enable() {
+    this.items = [...document.querySelectorAll(".work-item")];
 
     const TARGET_POSITION = "center";
     const SCROLLER_POSITION = "75%";
@@ -68,14 +71,35 @@ const WORKS = {
 
       this.scrolltriggers.push(ScrollTrigger.create(configuration));
 
-      el.addEventListener("mouseenter", () => {
+      const hoverCallback = () => {
         if (this.activeItemIndex === i) {
           return;
         }
 
         this.setActive(i);
-      });
+      };
+      el.addEventListener("mouseenter", hoverCallback);
+      this.hoverCallbacks.push(hoverCallback);
     });
   },
+  disable() {
+    this.scrolltriggers.forEach((st) => {
+      st.kill();
+    });
+    this.scrolltriggers = [];
+
+    this.items.forEach((el, i) => {
+      gsap.killTweensOf(el);
+      el.removeEventListener("mouseenter", this.hoverCallbacks[i]);
+    });
+    this.hoverCallbacks = [];
+  },
 };
-WORKS.init();
+
+mm.add("(min-width: 1000px) and (hover: hover)", () => {
+  WORKS.enable();
+
+  return () => {
+    WORKS.disable();
+  };
+});
