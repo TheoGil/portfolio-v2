@@ -2,6 +2,8 @@
 
 .work {
   @include fluid("margin-bottom", 238px, 415px);
+
+  margin-bottom: 1000px;
 }
 
 .work__title {
@@ -9,36 +11,49 @@
 }
 
 .work__list {
-  @include fluid("gap", 100px, 160px);
+  // @include fluid("gap", 100px, 160px); // DESIGN
+  @include fluid("gap", 200px, 320px); // SCROLL FEELS BETTER
 
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
 
-.work-item__video-wrapper {
-  --scale: 0;
-
+.work-item {
   @include fluid("--width", 350px, 600px);
   @include fluid("--height", 350px, 400px);
-}
 
-.work-item__video-wrapper {
+  --scale: 0;
+
   position: relative;
-  width: calc(var(--width) * var(--scale));
-  height: calc(var(--height) * var(--scale));
-  margin: 12px auto;
+  width: 100%;
+  // outline: 1px currentColor solid;
+  gap: 12px;
+
+  .h3 {
+    position: relative;
+    z-index: 1;
+    translate: 0
+      calc(var(--height) / 2 * -1 * var(--scale) - 12px * var(--scale));
+  }
+
+  .h4 {
+    position: relative;
+    translate: 0 calc(var(--height) / 2 * var(--scale) + 12px * var(--scale));
+  }
 }
 
 .work-item__video {
-  --scale: 0;
-
+  width: var(--width);
+  height: var(--height);
   position: absolute;
   top: 50%;
   left: 50%;
   translate: -50% -50%;
-  width: calc(var(--width) * var(--scale));
-  height: calc(var(--height) * var(--scale));
+  scale: var(--scale);
+  // width: calc(var(--width) * var(--scale));
+  // height: calc(var(--height) * var(--scale));
   object-fit: cover;
-  background-color: rgba(255, 0, 0, 0.434);
+  margin: 12px auto;
+  scale: var(--scale);
 }
