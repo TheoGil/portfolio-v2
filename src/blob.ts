@@ -185,7 +185,13 @@ async function loadDials() {
     import("dialkit/vanilla"),
     import("dialkit/vanilla/styles.css"),
   ]);
-  createDialRoot({ position: "top-right", defaultOpen: false });
+  createDialRoot({
+    position: "top-right",
+    defaultOpen: false,
+    // The default "thumbnails" captures the whole page (canvas included) on
+    // load and after each change, which freezes the page for ~1s.
+    versions: "menu",
+  });
   const { eyes, mouth } = faceStyle;
   createDialKit("Faces", {
     eyes: {
