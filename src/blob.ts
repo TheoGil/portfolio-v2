@@ -1,12 +1,5 @@
 import "./style.css";
-import {
-  Bodies,
-  Body,
-  Runner,
-  Shapes,
-  Spring,
-  World,
-} from "./physics/index.ts";
+import { Bodies, Body, Runner, Spring, World } from "./physics/index.ts";
 
 // -----------------------------------------------------------------------------
 // Canvas
@@ -97,17 +90,6 @@ function populate() {
     placed.push({ x, y, r });
     addBlob(x, y, r);
   }
-}
-
-/** Irregular rounded blob. */
-function blobVertices(radius: number) {
-  const points = [];
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2;
-    const r = radius * (1 + 0.25 * Math.sin(a * 3) + 0.1 * Math.cos(a * 5));
-    points.push({ x: Math.cos(a) * r, y: Math.sin(a) * r * 0.8 });
-  }
-  return points;
 }
 
 /**
