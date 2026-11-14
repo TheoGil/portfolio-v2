@@ -1,6 +1,9 @@
 @use "../mixins" as *;
 
 .work {
+  @include fluid("--item-width", 350px, 600px);
+  @include fluid("--item-height", 350px, 400px);
+
   @include fluid("margin-bottom", 238px, 415px);
 
   margin-bottom: 1000px;
@@ -8,6 +11,11 @@
 
 .work__title {
   @include fluid("margin-bottom", 141px, 255px);
+
+  translate: 0
+    calc(
+      (var(--item-height) / 4) * -1 * var(--active) * var(--scale-multiplier)
+    );
 }
 
 .work__list {
@@ -21,6 +29,7 @@
 .work-item .h4 {
   will-change: translate;
 }
+
 .work-item__video {
   will-change: scale;
 }
@@ -32,13 +41,10 @@
     initial-value: 0;
   }
 
-  @include fluid("--width", 350px, 600px);
-  @include fluid("--height", 350px, 400px);
-
   --active: 0;
   --scale-multiplier: 0;
   --scale: calc(var(--active) * var(--scale-multiplier));
-  --title-vertical-offset: calc((var(--height) / 2 + 12px) * var(--scale));
+  --title-vertical-offset: calc((var(--item-height) / 2 + 12px) * var(--scale));
 
   position: relative;
   width: 100%;
@@ -63,8 +69,8 @@
   left: 50%;
   translate: -50% -50%;
   scale: calc(var(--scale));
-  width: var(--width);
-  height: var(--height);
+  width: var(--item-width);
+  height: var(--item-height);
   margin: 12px auto;
   object-fit: cover;
 }

@@ -6,13 +6,15 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const workTitleEl = document.querySelector(".work__title");
+
 const WORKS = {
   items: [] as Element[],
   scrolltriggers: [] as ScrollTrigger[],
   hoverCallbacks: [] as (() => void)[],
   activeItemIndex: null as null | number,
   animateItemIn(i: number) {
-    const el = this.items[i];
+    const el = i === 0 ? [this.items[i], workTitleEl] : this.items[i];
 
     gsap.killTweensOf(el);
 
@@ -23,7 +25,7 @@ const WORKS = {
     });
   },
   animateItemOut(i: number) {
-    const el = this.items[i];
+    const el = i === 0 ? [this.items[i], workTitleEl] : this.items[i];
 
     gsap.killTweensOf(el);
 
@@ -62,6 +64,16 @@ const WORKS = {
         },
       };
 
+      if (i === 0) {
+        configuration.onLeaveBack = () => {
+          if (this.activeItemIndex !== 0) {
+            return;
+          }
+
+          this.animateItemOut(0);
+        };
+      }
+
       if (i < this.items.length - 1) {
         configuration.endTrigger = this.items[i + 1];
         configuration.end = POSITION;
@@ -69,13 +81,14 @@ const WORKS = {
 
       this.scrolltriggers.push(ScrollTrigger.create(configuration));
 
-      const updateScaleMultiplier = (self: ScrollTrigger) => {
-        const p = 1 - Math.abs(self.progress * 2 - 1);
+      const updateScaleMultiplier = (i: number, progress: number) => {
+        const p = 1 - Math.abs(progress * 2 - 1);
 
-        (el as HTMLElement).style.setProperty(
-          "--scale-multiplier",
-          gsap.utils.mapRange(0, 1, 0.8, 1, p).toFixed(4),
-        );
+        const el = i === 0 ? [this.items[i], workTitleEl] : this.items[i];
+
+        gsap.set(el, {
+          "--scale-multiplier": gsap.utils.mapRange(0, 1, 0.8, 1, p).toFixed(4),
+        });
       };
 
       this.scrolltriggers.push(
@@ -83,8 +96,12 @@ const WORKS = {
           trigger: el,
           start: "center bottom",
           end: "center top",
-          onUpdate: updateScaleMultiplier,
-          onRefresh: updateScaleMultiplier,
+          onUpdate: (self: ScrollTrigger) => {
+            updateScaleMultiplier(i, self.progress);
+          },
+          onRefresh: (self: ScrollTrigger) => {
+            updateScaleMultiplier(i, self.progress);
+          },
         }),
       );
 
