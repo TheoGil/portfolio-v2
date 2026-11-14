@@ -17,7 +17,7 @@ const WORKS = {
     gsap.killTweensOf(el);
 
     gsap.to(el, {
-      "--scale": 1,
+      "--active": 1,
       ease: "elastic(0.85, 0.75)",
       duration: 0.75,
     });
@@ -28,7 +28,7 @@ const WORKS = {
     gsap.killTweensOf(el);
 
     gsap.to(el, {
-      "--scale": 0,
+      "--active": 0,
       ease: "power3.out",
       duration: 0.25,
     });
@@ -68,6 +68,25 @@ const WORKS = {
       }
 
       this.scrolltriggers.push(ScrollTrigger.create(configuration));
+
+      const updateScaleMultiplier = (self: ScrollTrigger) => {
+        const p = 1 - Math.abs(self.progress * 2 - 1);
+
+        (el as HTMLElement).style.setProperty(
+          "--scale-multiplier",
+          gsap.utils.mapRange(0, 1, 0.8, 1, p).toFixed(4),
+        );
+      };
+
+      this.scrolltriggers.push(
+        ScrollTrigger.create({
+          trigger: el,
+          start: "center bottom",
+          end: "center top",
+          onUpdate: updateScaleMultiplier,
+          onRefresh: updateScaleMultiplier,
+        }),
+      );
 
       const hoverCallback = () => {
         if (this.activeItemIndex === i) {

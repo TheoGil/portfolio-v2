@@ -26,26 +26,34 @@
 }
 
 .work-item {
+  @property --scale-multiplier {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+  }
+
   @include fluid("--width", 350px, 600px);
   @include fluid("--height", 350px, 400px);
 
-  --scale: 0;
+  --active: 0;
+  --scale-multiplier: 0;
+  --scale: calc(var(--active) * var(--scale-multiplier));
+  --title-vertical-offset: calc((var(--height) / 2 + 12px) * var(--scale));
 
   position: relative;
   width: 100%;
-  // outline: 1px currentColor solid;
   gap: 12px;
+  transition: --scale-multiplier 250ms linear;
 
   .h3 {
     position: relative;
     z-index: 1;
-    translate: 0
-      calc(var(--height) / 2 * -1 * var(--scale) - 12px * var(--scale));
+    translate: 0 calc(var(--title-vertical-offset) * -1);
   }
 
   .h4 {
     position: relative;
-    translate: 0 calc(var(--height) / 2 * var(--scale) + 12px * var(--scale));
+    translate: 0 var(--title-vertical-offset);
   }
 }
 
@@ -54,7 +62,7 @@
   top: 50%;
   left: 50%;
   translate: -50% -50%;
-  scale: var(--scale);
+  scale: calc(var(--scale));
   width: var(--width);
   height: var(--height);
   margin: 12px auto;
