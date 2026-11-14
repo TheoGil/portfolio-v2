@@ -88,7 +88,9 @@ Stiffness and damping values are normalized by point mass (they are acceleration
 
 ### Methods
 
-`setPosition`, `setAngle`, `setVelocity`, `setAngularVelocity`, `applyForce`, `applyTorque`, `applyImpulse`, `containsPoint`, `closestPoint`, `getTransform`, `area`.
+`setPosition`, `setAngle`, `setVelocity`, `setAngularVelocity`, `setPressure`, `applyForce`, `applyTorque`, `applyImpulse`, `containsPoint`, `closestPoint`, `getTransform`, `area`.
+
+`setPressure` changes the firmness of a soft body live and re-tensions its edges, so it keeps its size (assigning `body.pressure` directly would inflate or deflate it).
 
 ## Springs
 

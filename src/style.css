@@ -131,6 +131,12 @@ canvas {
   inset: 0;
   width: 100%;
   height: 100%;
-  outline: var(--outline-width) #ebebeb dashed;
-  outline-offset: calc(var(--outline-width) * -1);
+  background: #fcf7f3;
+
+  /* Touch gestures go to the page, not to the browser (scroll, zoom) */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }

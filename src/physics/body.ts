@@ -196,8 +196,10 @@ export class Body {
   readonly springD: number[] = [];
   shapeStiffness: number;
   shapeDamping: number;
-  /** Gas pressure, already multiplied by point mass. */
+  /** Gas pressure, already multiplied by point mass. Change it with `setPressure`. */
   pressure: number;
+  /** Base stiffness of edge springs, normalized (before auto-stiffening). */
+  private readonly edgeStiffness: number;
   /**
    * Gas amount relative to the rest area. Pressure follows the ideal gas law:
    * P = pressure * inflation * restArea / area
@@ -363,41 +365,14 @@ export class Body {
     const shapeDefault = this.kind === "pressure" && hasHoles ? HOLE_SHAPE_STIFFNESS : defaults.shapeStiffness;
     this.shapeStiffness = (options.shapeStiffness ?? shapeDefault) * m;
     this.shapeDamping = (options.shapeDamping ?? defaults.shapeDamping) * m;
-    const pressure = options.pressure ?? defaults.pressure;
-    this.pressure = pressure * m;
+    this.pressure = 0;
     this.inflation = options.inflation ?? 1;
+    this.edgeStiffness = options.edgeStiffness ?? defaults.edgeStiffness;
     if (this.isSoft) {
-      const edgeK = options.edgeStiffness ?? defaults.edgeStiffness;
+      // Edge springs come first: spring i is the edge from point i to next[i]
       const edgeD = options.edgeDamping ?? defaults.edgeDamping;
-      for (let k = 0; k < this.loopStarts.length - 1; k++) {
-        const start = this.loopStarts[k];
-        const end = this.loopStarts[k + 1];
-        // Pre-tension outer edges so that the gas pressure is balanced at rest
-        // (like a balloon skin). Laplace's law: tension = pressure * radius,
-        // with radius = 2 * area / perimeter. Edges are stiffened if needed so
-        // that pre-tension stays below MAX_PRESTRETCH of their length (big
-        // bodies need more tension).
-        let tension = 0;
-        let loopK = edgeK;
-        if (pressure !== 0 && edgeK > 0 && signedArea(loops[k]) > 0) {
-          let perimeter = 0;
-          let loopCross2 = 0;
-          for (let i = start; i < end; i++) {
-            const j = this.next[i];
-            perimeter += Math.hypot(this.lx[j] - this.lx[i], this.ly[j] - this.ly[i]);
-            loopCross2 += this.lx[i] * this.ly[j] - this.lx[j] * this.ly[i];
-          }
-          tension = (pressure * loopCross2) / perimeter;
-          const meanLength = perimeter / (end - start);
-          const needed = Math.abs(tension) / (MAX_PRESTRETCH * meanLength);
-          loopK = Math.max(edgeK, Math.min(needed, MAX_EDGE_STIFFNESS));
-        }
-        for (let i = start; i < end; i++) {
-          const j = this.next[i];
-          const length = Math.hypot(this.lx[j] - this.lx[i], this.ly[j] - this.ly[i]);
-          this.addSpring(i, j, loopK, edgeD, Math.max(length * 0.05, length - tension / loopK));
-        }
-      }
+      for (let i = 0; i < n; i++) this.addSpring(i, this.next[i], this.edgeStiffness, edgeD);
+      this.setPressure(options.pressure ?? defaults.pressure);
       const bendK = options.bendStiffness ?? defaults.bendStiffness;
       if (bendK > 0) {
         const bendD = options.bendDamping ?? defaults.bendDamping;
@@ -433,6 +408,48 @@ export class Body {
     this.springRest.push(rest);
     this.springK.push(stiffness * this.pointMass);
     this.springD.push(damping * this.pointMass);
+  }
+
+  /**
+   * Sets the gas pressure (firmness) of a soft body, same unit as the
+   * `pressure` option. Edges are re-tensioned so that the body keeps its rest
+   * size: only its firmness changes. Use `inflation` to change its size.
+   */
+  setPressure(pressure: number) {
+    this.pressure = pressure * this.pointMass;
+    if (!this.isSoft) return;
+    const edgeK = this.edgeStiffness;
+    const { lx, ly, next, gasLoops } = this;
+    // Pre-tension outer edges so that the gas pressure is balanced at rest
+    // (like a balloon skin). Laplace's law: tension = pressure * radius, with
+    // radius = 2 * area / perimeter. Edges are stiffened if needed so that
+    // pre-tension stays below MAX_PRESTRETCH of their length (big bodies need
+    // more tension). Holes are not filled with gas and keep their edges as is.
+    for (let g = 0; g < gasLoops.length; g += 2) {
+      const start = gasLoops[g];
+      const end = gasLoops[g + 1];
+      let tension = 0;
+      let loopK = edgeK;
+      if (pressure !== 0 && edgeK > 0) {
+        let perimeter = 0;
+        let loopCross2 = 0;
+        for (let i = start; i < end; i++) {
+          const j = next[i];
+          perimeter += Math.hypot(lx[j] - lx[i], ly[j] - ly[i]);
+          loopCross2 += lx[i] * ly[j] - lx[j] * ly[i];
+        }
+        tension = (pressure * loopCross2) / perimeter;
+        const meanLength = perimeter / (end - start);
+        const needed = Math.abs(tension) / (MAX_PRESTRETCH * meanLength);
+        loopK = Math.max(edgeK, Math.min(needed, MAX_EDGE_STIFFNESS));
+      }
+      for (let i = start; i < end; i++) {
+        const j = next[i];
+        const length = Math.hypot(lx[j] - lx[i], ly[j] - ly[i]);
+        this.springK[i] = loopK * this.pointMass;
+        this.springRest[i] = loopK > 0 ? Math.max(length * 0.05, length - tension / loopK) : length;
+      }
+    }
   }
 
   /** Current area of the material (holes subtracted). */

@@ -154,6 +154,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dialkit@npm:2.2.0":
+  version: 2.2.0
+  resolution: "dialkit@npm:2.2.0"
+  peerDependencies:
+    motion: ">=11.0.0"
+    motion-v: ">=2.0.0"
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+    solid-js: ">=1.6.0"
+    svelte: ">=5.8.0"
+    vue: ">=3.3.0"
+  peerDependenciesMeta:
+    motion:
+      optional: true
+    motion-v:
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+    solid-js:
+      optional: true
+    svelte:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/34ad5970d9a57a6c1f22f75796a0ba15955d31b1273280999f1e1b173498af2cc72c33b7054938e2ac9562f51ad0f9e7f6a9c8ee1ae326a09e6cb28b70664723
+  languageName: node
+  linkType: hard
+
 "env-paths@npm:^2.2.0":
   version: 2.2.1
   resolution: "env-paths@npm:2.2.1"
@@ -407,6 +437,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "portfolio-v2@workspace:."
   dependencies:
+    dialkit: "npm:2.2.0"
     typescript: "npm:~6.0.3"
     vite: "npm:^8.3.4"
   languageName: unknown
