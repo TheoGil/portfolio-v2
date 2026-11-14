@@ -98,7 +98,7 @@ function populate() {
  * side of the screen.
  */
 const blobSettings = {
-  count: 40,
+  count: 100,
   radius: { min: 0.04, max: 0.18 },
   pressure: { min: 300, max: 1500 },
 };
