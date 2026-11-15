@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "opentype.js": "2.0.0",
     "typescript": "~6.0.3",
     "vite": "^8.3.4"
   },

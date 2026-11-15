@@ -419,6 +419,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"opentype.js@npm:2.0.0":
+  version: 2.0.0
+  resolution: "opentype.js@npm:2.0.0"
+  bin:
+    ot: bin/ot
+  checksum: 10c0/85539aca7b99ec10019adcdd2bcc74d0ab2757277f775394826db0fb465c5e075fa67cff83ce30082c990640225c1c678ddd23c1ba1c9580d167335ad5300b91
+  languageName: node
+  linkType: hard
+
 "picocolors@npm:^1.1.1":
   version: 1.1.1
   resolution: "picocolors@npm:1.1.1"
@@ -438,6 +447,7 @@ __metadata:
   resolution: "portfolio-v2@workspace:."
   dependencies:
     dialkit: "npm:2.2.0"
+    opentype.js: "npm:2.0.0"
     typescript: "npm:~6.0.3"
     vite: "npm:^8.3.4"
   languageName: unknown

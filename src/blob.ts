@@ -1,5 +1,13 @@
 import "./style.css";
-import { Bodies, Body, Runner, Spring, World } from "./physics/index.ts";
+import {
+  Bodies,
+  Body,
+  Runner,
+  SOFT_DEFAULTS,
+  Spring,
+  World,
+} from "./physics/index.ts";
+import word from "./theo.json";
 
 // -----------------------------------------------------------------------------
 // Canvas
@@ -75,17 +83,22 @@ function populate() {
   time = 0;
 
   faces.clear();
+  letters.clear();
+  const boxes = addWord();
 
-  // `count` random blobs. One overlapping a previous blob is discarded, so
-  // there can be fewer than `count`.
+  // `count` random blobs. One overlapping a previous blob or a letter is
+  // discarded, so there can be fewer than `count`.
   const placed: { x: number; y: number; r: number }[] = [];
   for (let n = 0; n < blobSettings.count; n++) {
     const r = randomRadius();
     const x = randomBetween(r, width - r);
     const y = randomBetween(r, height - r);
-    const overlaps = placed.some(
-      (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + r) ** 2,
-    );
+    const overlaps =
+      placed.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + r) ** 2) ||
+      boxes.some(
+        (b) =>
+          x + r > b.minX && x - r < b.maxX && y + r > b.minY && y - r < b.maxY,
+      );
     if (overlaps) continue;
     placed.push({ x, y, r });
     addBlob(x, y, r);
@@ -123,6 +136,98 @@ function addBlob(x: number, y: number, r: number) {
 
 function spawn(x: number, y: number) {
   addBlob(x, y, randomRadius());
+}
+
+// -----------------------------------------------------------------------------
+// Word: letters of THÉO in Marsipan, soft bodies without face. The outlines
+// come from scripts/glyphs.ts (em units, y down, baseline at 0).
+// -----------------------------------------------------------------------------
+
+const LETTER_COLOR = "#FBD710";
+const letters = new Set<Body>();
+
+/**
+ * Letter size (px per em) the letters were tuned at: 1920x911. Smaller
+ * letters are made stiffer and denser (see letterOptions).
+ */
+const REFERENCE_LETTER_SIZE = (911 * 0.35) / word.capHeight;
+
+/**
+ * On small screens, letters squash much more than on desktop:
+ * - gravity is in px/s², so under the same load a letter sinks by about the
+ *   same number of pixels whatever its size: smaller letters need more
+ *   stiffness. In theory linearly with the size ratio, but portrait screens
+ *   also pile more blobs on the letters: squared, measured on a 390x844 phone
+ *   (deformation 11% of the letter height -> 1.2%, 2% on desktop). Capped so
+ *   that edges stay below the engine's stable stiffness (30000). Damping
+ *   follows (√) to keep the same damping ratio.
+ * - blobs follow the smallest side of the screen, the word follows its width
+ *   on portrait screens: blobs are heavier relative to the letters. Density
+ *   grows by the same ratio.
+ * Both factors are 1 on screens as big as the reference, or bigger.
+ */
+function letterOptions(size: number) {
+  const stiffness = Math.min(
+    Math.max(1, REFERENCE_LETTER_SIZE / size) ** 2,
+    20,
+  );
+  // Size the word would have if limited by the smallest side, like the blobs
+  const blobScale = (Math.min(width, height) * 0.35) / word.capHeight;
+  const density = Math.max(1, blobScale / size) ** 2;
+  const { shape } = SOFT_DEFAULTS;
+  return {
+    edgeStiffness: shape.edgeStiffness * stiffness,
+    edgeDamping: shape.edgeDamping * Math.sqrt(stiffness),
+    shapeStiffness: shape.shapeStiffness * stiffness,
+    shapeDamping: shape.shapeDamping * Math.sqrt(stiffness),
+    density: 0.001 * density, // 0.001: engine default
+  };
+}
+
+/** Adds the word centered on screen. Returns the bounds of its letters. */
+function addWord() {
+  const size = Math.min(
+    (width * 0.8) / word.width,
+    (height * 0.35) / word.capHeight,
+  );
+  const options = letterOptions(size);
+  const originX = (width - word.width * size) / 2;
+  const baseline = (height + word.capHeight * size) / 2;
+  const boxes: { minX: number; minY: number; maxX: number; maxY: number }[] =
+    [];
+
+  for (const { loops } of word.letters) {
+    let cx = 0;
+    let cy = 0;
+    let count = 0;
+    const shape = loops.map((loop) => {
+      const points = [];
+      for (let i = 0; i < loop.length; i += 2) {
+        const x = originX + loop[i] * size;
+        const y = baseline + loop[i + 1] * size;
+        points.push({ x, y });
+        cx += x;
+        cy += y;
+        count++;
+      }
+      return points;
+    });
+    // Bodies are positioned by the mean of their points
+    const body = Bodies.fromShape(cx / count, cy / count, shape, {
+      ...options,
+      kind: "shape",
+      label: "letter",
+    });
+    world.add(body);
+    letters.add(body);
+    boxes.push({
+      minX: body.minX,
+      minY: body.minY,
+      maxX: body.maxX,
+      maxY: body.maxY,
+    });
+  }
+  return boxes;
 }
 
 function setAllPressures(pressure: number) {
@@ -402,8 +507,8 @@ function drawBody(body: Body) {
     return;
   }
   const face = faces.get(body);
-  if (face) {
-    ctx.fillStyle = face.palette.body;
+  if (face || letters.has(body)) {
+    ctx.fillStyle = face ? face.palette.body : LETTER_COLOR;
     ctx.fill("evenodd");
     return;
   }
