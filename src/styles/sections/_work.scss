@@ -34,13 +34,13 @@
   will-change: scale;
 }
 
-.work-item {
-  @property --scale-multiplier {
-    syntax: "<number>";
-    inherits: false;
-    initial-value: 0;
-  }
+@property --scale-multiplier {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
 
+.work-item {
   --active: 0;
   --scale-multiplier: 0;
   --scale: calc(var(--active) * var(--scale-multiplier));
