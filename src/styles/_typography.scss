@@ -17,7 +17,8 @@
 
 // Case studies
 .h2-small {
-  font-size: 112px;
+  @include fluid("font-size", 44px, 112px);
+
   text-transform: uppercase;
 }
 

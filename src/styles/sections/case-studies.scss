@@ -1,0 +1,121 @@
+@use "../mixins" as *;
+
+.case-studies {
+  @include fluid("margin-bottom", 162px, 331px);
+
+  overflow: hidden;
+}
+
+.case-studies__title {
+  @include fluid("gap", 16px, 40px);
+  @include fluid("margin-bottom", 72px, 186px);
+}
+
+.case-studies__title__decoration {
+  display: block;
+
+  @include fluid("width", 26px, 68px);
+}
+
+.case-studies__list {
+  max-width: 1286px;
+  width: 100%;
+  margin: auto;
+}
+
+.case-studies__item {
+  --transition-duration: 750ms;
+}
+
+.case-studies__item__inner {
+  @include fluid("gap", 20px, 120px);
+
+  position: relative;
+  color: var(--c-text);
+  padding: 56px 0;
+  text-decoration: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--c-text);
+    transition: scale var(--ease-out-quart) var(--transition-duration);
+  }
+
+  &:last-child {
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--c-text);
+      transition: scale var(--ease-out-quart) var(--transition-duration);
+    }
+  }
+
+  &:hover {
+    @media (min-width: 1350px) {
+      &::before,
+      &::after {
+        scale: 1.05 1;
+      }
+    }
+
+    .case-studies__item__button {
+      scale: 1.1;
+      rotate: -45deg;
+    }
+
+    @media (min-width: 1000px) {
+      .case-studies__item__tag {
+        translate: -20px 0;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.case-studies__item__button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: var(--c-text);
+  transition:
+    scale var(--ease-elastic) var(--transition-duration),
+    rotate var(--ease-elastic) var(--transition-duration);
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
+}
+
+.case-studies__item__title {
+  margin-right: auto;
+}
+
+.case-studies__item__tag {
+  flex-shrink: 0;
+  transition: translate var(--ease-out-quart) var(--transition-duration);
+}
+
+.case-studies__item__arrow {
+  display: block;
+  width: 42px;
+  height: auto;
+  fill: transparent;
+  stroke: var(--c-bg);
+}

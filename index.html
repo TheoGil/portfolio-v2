@@ -18,7 +18,7 @@
   <body>
     <main>
       <!-- Intro -->
-      <section class="intro flex flex-col align-center text-center">
+      <section class="wrapper intro flex flex-col align-center text-center">
         <!-- Intro title -->
         <p class="intro__title heading h3 flex flex-col">
           <span>Hello, I'm </span>
@@ -51,9 +51,9 @@
       </section>
 
       <!-- Selected work -->
-      <section class="work text-center">
+      <section class="wrapper work text-center">
         <h2 class="work__title heading h2">Work</h2>
-        <ol class="work__list flex flex-col align-center">
+        <ol class="work__list list-no-style flex flex-col align-center">
           <!-- Item -->
           <li class="work-item flex flex-col align-center">
             <h3 class="heading h3">Captain Goosebumps</h3>
@@ -169,6 +169,102 @@
             <div class="work-item__subtitle heading h4">
               Game / physical installation
             </div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Case studies -->
+      <section class="wrapper case-studies">
+        <h2
+          class="heading h2-small case-studies__title flex align-center justify-center text-center"
+        >
+          <svg
+            width="68"
+            height="68"
+            viewBox="0 0 68 68"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            class="case-studies__title__decoration"
+            aria-hidden="true"
+          >
+            <rect x="24" width="20" height="24" fill="#1E1E1E" />
+            <rect x="24" y="44" width="20" height="24" fill="#1E1E1E" />
+            <rect x="44" y="24" width="24" height="20" fill="#1E1E1E" />
+            <rect
+              x="-8.74228e-07"
+              y="24"
+              width="24"
+              height="20"
+              fill="#1E1E1E"
+            />
+          </svg>
+          Case studies
+          <svg
+            width="68"
+            height="68"
+            viewBox="0 0 68 68"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            class="case-studies__title__decoration"
+            aria-hidden="true"
+          >
+            <rect x="24" width="20" height="24" fill="#1E1E1E" />
+            <rect x="24" y="44" width="20" height="24" fill="#1E1E1E" />
+            <rect x="44" y="24" width="24" height="20" fill="#1E1E1E" />
+            <rect
+              x="-8.74228e-07"
+              y="24"
+              width="24"
+              height="20"
+              fill="#1E1E1E"
+            />
+          </svg>
+        </h2>
+        <ol class="flex flex-col list-no-style case-studies__list">
+          <!-- Item -->
+          <li class="case-studies__item">
+            <a
+              href="https://www.epic.net/en/article/captain-goosebumps-technical-case-study/"
+              target="_blank"
+              class="case-studies__item__inner align-center flex"
+            >
+              <div
+                class="heading h3 case-studies__item__title"
+                aria-hidden="true"
+              >
+                Captain Goosebumps
+              </div>
+              <div
+                class="heading h4 case-studies__item__tag"
+                aria-hidden="true"
+              >
+                Case study
+              </div>
+              <div class="case-studies__item__button" aria-hidden="true">
+                <svg
+                  width="46"
+                  height="42"
+                  viewBox="0 0 46 42"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="case-studies__item__arrow"
+                >
+                  <path
+                    d="M22.0663 2.79834L40.9999 19.2866C42.1445 20.2834 42.1445 21.8996 40.9999 22.8964L22.4117 39.0838"
+                    stroke-width="7.42203"
+                    stroke="#FCF7F3"
+                  />
+                  <path
+                    d="M0.00012207 20.9414L38.7596 20.9414"
+                    stroke-width="7.42203"
+                    stroke="#FCF7F3"
+                  />
+                </svg>
+              </div>
+              <span class="visually-hidden">
+                Read the Captain Goosebumps technical case study on epic.net
+              </span>
+            </a>
           </li>
         </ol>
       </section>
