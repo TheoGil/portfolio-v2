@@ -4,6 +4,8 @@ import { gsap } from "gsap";
 
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { BOUNCY_LINES } from "./bouncy-lines.ts";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const workTitleEl = document.querySelector(".work__title");
@@ -130,3 +132,4 @@ const WORKS = {
   },
 };
 WORKS.enable();
+BOUNCY_LINES.enable();

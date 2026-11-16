@@ -3,7 +3,8 @@
 .case-studies {
   @include fluid("margin-bottom", 162px, 331px);
 
-  overflow: hidden;
+  // clip (not hidden) so the bouncy lines can still overflow vertically
+  overflow-x: clip;
 }
 
 .case-studies__title {
@@ -35,34 +36,9 @@
   padding: 56px 0;
   text-decoration: none;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--c-text);
-    transition: scale var(--ease-out-quart) var(--transition-duration);
-  }
-
-  &:last-child {
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: var(--c-text);
-      transition: scale var(--ease-out-quart) var(--transition-duration);
-    }
-  }
-
   &:hover {
     @media (min-width: 1350px) {
-      &::before,
-      &::after {
+      .bouncy-line {
         scale: 1.05 1;
       }
     }
@@ -83,6 +59,36 @@
     gap: 10px;
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+// Horizontal separators, deformed by src/bouncy-lines.ts
+.bouncy-line {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 2px;
+  overflow: visible;
+  pointer-events: none;
+  transition: scale var(--ease-out-quart) var(--transition-duration);
+
+  path {
+    fill: none;
+    stroke: var(--c-text);
+    stroke-width: 2;
+  }
+}
+
+.bouncy-line--top {
+  top: 0;
+}
+
+.bouncy-line--bottom {
+  bottom: 0;
+
+  .case-studies__item:not(:last-child) & {
+    display: none;
   }
 }
 
