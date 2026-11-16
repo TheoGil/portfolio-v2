@@ -6,7 +6,9 @@ import {
   SOFT_DEFAULTS,
   Spring,
   World,
+  type Vec2,
 } from "./physics/index.ts";
+import { CREATURES } from "./creatures.ts";
 import word from "./theo.json";
 
 // -----------------------------------------------------------------------------
@@ -86,13 +88,20 @@ function populate() {
   letters.clear();
   const boxes = addWord();
 
-  // `count` random blobs. One overlapping a previous blob or a letter is
-  // discarded, so there can be fewer than `count`.
+  // `count` random blobs or creatures. One overlapping a previous one or a
+  // letter is discarded, so there can be fewer than `count`.
   const placed: { x: number; y: number; r: number }[] = [];
   for (let n = 0; n < blobSettings.count; n++) {
-    const r = randomRadius();
-    const x = randomBetween(r, width - r);
-    const y = randomBetween(r, height - r);
+    const radius = randomRadius();
+    const x = randomBetween(radius, width - radius);
+    const y = randomBetween(radius, height - radius);
+    const creature = createCreature(x, y, radius);
+    // Bounding circle: creatures can reach a bit further than `radius`
+    const { body } = creature;
+    let r = 0;
+    for (let i = 0; i < body.pointCount; i++) {
+      r = Math.max(r, Math.hypot(body.px[i] - x, body.py[i] - y));
+    }
     const overlaps =
       placed.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + r) ** 2) ||
       boxes.some(
@@ -101,7 +110,7 @@ function populate() {
       );
     if (overlaps) continue;
     placed.push({ x, y, r });
-    addBlob(x, y, r);
+    addCreature(creature);
   }
 }
 
@@ -123,19 +132,60 @@ function randomRadius() {
   return randomBetween(min, max) * Math.min(width, height);
 }
 
-function addBlob(x: number, y: number, r: number) {
-  const { pressure } = blobSettings;
-  const body = Bodies.circle(x, y, r, {
-    kind: "pressure",
-    pressure: randomBetween(pressure.min, pressure.max),
-    angle: Math.random() * Math.PI * 2,
+/**
+ * A body with a face, not yet added to the world: a pressure blob of radius
+ * `r` or, one time out of two, one of the creature shapes (shape matching),
+ * scaled so that its half width is `r`.
+ */
+function createCreature(x: number, y: number, r: number) {
+  const angle = Math.random() * Math.PI * 2;
+  if (Math.random() < 0.5) {
+    const { pressure } = blobSettings;
+    const body = Bodies.circle(x, y, r, {
+      kind: "pressure",
+      pressure: randomBetween(pressure.min, pressure.max),
+      angle,
+    });
+    return { body, face: createFace(r) };
+  }
+
+  const creature = CREATURES[Math.floor(Math.random() * CREATURES.length)];
+  const scale = r / creature.size;
+  const outline = creature.outline.map((p) => ({
+    x: p.x * scale,
+    y: p.y * scale,
+  }));
+  const body = Bodies.fromShape(x, y, [outline], { kind: "shape", angle });
+
+  // The face is drawn in the rest frame of the body, centered on the mean of
+  // its points. Subdividing edges keeps the bounding box: the offset between
+  // the outline and the rest shape boxes is that mean.
+  let minX = Infinity;
+  let minY = Infinity;
+  for (const p of outline) {
+    minX = Math.min(minX, p.x);
+    minY = Math.min(minY, p.y);
+  }
+  let restMinX = Infinity;
+  let restMinY = Infinity;
+  for (let i = 0; i < body.pointCount; i++) {
+    restMinX = Math.min(restMinX, body.lx[i]);
+    restMinY = Math.min(restMinY, body.ly[i]);
+  }
+  const face = createFace(r, {
+    x: creature.face.x * scale - (minX - restMinX),
+    y: creature.face.y * scale - (minY - restMinY),
   });
+  return { body, face };
+}
+
+function addCreature({ body, face }: ReturnType<typeof createCreature>) {
   world.add(body);
-  addFace(body, r);
+  faces.set(body, face);
 }
 
 function spawn(x: number, y: number) {
-  addBlob(x, y, randomRadius());
+  addCreature(createCreature(x, y, randomRadius()));
 }
 
 // -----------------------------------------------------------------------------
@@ -268,6 +318,12 @@ const faceStyle = {
 interface Face {
   /** Radius of the body, faces are drawn relative to it. */
   size: number;
+  /**
+   * Creatures only: where the face is centered (between the top of the eyes
+   * and the bottom of the mouth), in the rest frame of the body. Blobs draw
+   * the face relative to their center, with the offsets of `faceStyle`.
+   */
+  center: Vec2 | null;
   palette: Palette;
   /** Smoothed sideways speed in the body frame, -1..1: the face slides toward it. */
   look: number;
@@ -276,13 +332,14 @@ interface Face {
 
 const faces = new Map<Body, Face>();
 
-function addFace(body: Body, size: number) {
-  faces.set(body, {
+function createFace(size: number, center: Vec2 | null = null): Face {
+  return {
     size,
+    center,
     palette: PALETTES[Math.floor(Math.random() * PALETTES.length)],
     look: 0,
     blinkAt: time + 1 + Math.random() * 4,
-  });
+  };
 }
 
 async function loadDials() {
@@ -540,9 +597,15 @@ function drawFace(body: Body, face: Face, frameDelta: number) {
   const t = body.getTransform(0.7, faceTransform);
   ctx.save();
   ctx.transform(t.a, t.b, t.c, t.d, t.e, t.f);
+  const { eyes, mouth } = faceStyle;
+  if (face.center) {
+    // Middle of the face, from the top of the eyes to the bottom of the mouth
+    const middle =
+      (eyes.y - eyes.size + mouth.y + Math.max(0, mouth.height)) / 2;
+    ctx.translate(face.center.x, face.center.y - middle * r);
+  }
   ctx.translate(face.look * r * 0.35, 0);
 
-  const { eyes, mouth } = faceStyle;
   const { palette } = face;
 
   // Round eyes with a centered pupil, squashed vertically to blink
